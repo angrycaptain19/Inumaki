@@ -6,7 +6,13 @@ from coffeehouse.api import API
 from coffeehouse.exception import CoffeeHouseError as CFError
 
 from telegram import Update
-from telegram.ext import CommandHandler, MessageHandler, Filters, run_async, CallbackContext
+from telegram.ext import (
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    run_async,
+    CallbackContext,
+)
 from telegram.error import BadRequest, Unauthorized, RetryAfter
 
 from lynda import dispatcher, AI_API_KEY, OWNER_ID
@@ -82,13 +88,14 @@ def chatbot(update: Update, context: CallbackContext):
         except ValueError:
             pass
         try:
-            context.bot.send_chat_action(chat_id, action='typing')
+            context.bot.send_chat_action(chat_id, action="typing")
             rep = api_client.think_thought(sesh, query)
             sleep(0.3)
             msg.reply_text(rep, timeout=60)
         except CFError as e:
             context.bot.send_message(
-                OWNER_ID, f"Chatbot error: {e} occurred in {chat_id}!")
+                OWNER_ID, f"Chatbot error: {e} occurred in {chat_id}!"
+            )
 
 
 @run_async
@@ -129,9 +136,14 @@ Lists the chats the chatmode is enabled in.
 
 ADD_CHAT_HANDLER = CommandHandler("addchat", add_chat)
 REMOVE_CHAT_HANDLER = CommandHandler("rmchat", remove_chat)
-CHATBOT_HANDLER = MessageHandler(Filters.text & (~Filters.regex(
-    r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^s\/")), chatbot)
-CHATBOTLIST_HANDLER = CommandHandler("listai", list_chatbot, filters=CustomFilters.dev_filter)
+CHATBOT_HANDLER = MessageHandler(
+    Filters.text
+    & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^s\/")),
+    chatbot,
+)
+CHATBOTLIST_HANDLER = CommandHandler(
+    "listai", list_chatbot, filters=CustomFilters.dev_filter
+)
 # Filters for ignoring #note messages, !commands and sed.
 
 dispatcher.add_handler(ADD_CHAT_HANDLER)

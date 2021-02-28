@@ -37,9 +37,12 @@ def separate_sed(sed_string):
         return None
 
     while counter < len(sed_string):
-        if sed_string[counter] == "\\" and counter + \
-                1 < len(sed_string) and sed_string[counter + 1] == delim:
-            sed_string = sed_string[:counter] + sed_string[counter + 1:]
+        if (
+            sed_string[counter] == "\\"
+            and counter + 1 < len(sed_string)
+            and sed_string[counter + 1] == delim
+        ):
+            sed_string = sed_string[:counter] + sed_string[counter + 1 :]
 
         elif sed_string[counter] == delim:
             replace_with = sed_string[start:counter]
@@ -71,7 +74,8 @@ def sed(update: Update, _):
 
         if not repl:
             update.effective_message.reply_to_message.reply_text(
-                "You're trying to replace... " "nothing with something?")
+                "You're trying to replace... " "nothing with something?"
+            )
             return
 
         try:
@@ -81,35 +85,30 @@ def sed(update: Update, _):
                 update.effective_message.reply_to_message.reply_text(
                     "Hey everyone, {} is trying to make "
                     "me say stuff I don't wanna "
-                    "say!".format(
-                        update.effective_user.first_name))
+                    "say!".format(update.effective_user.first_name)
+                )
                 return
 
-            if 'i' in flags and 'g' in flags:
+            if "i" in flags and "g" in flags:
                 text = re.sub(repl, repl_with, to_fix, flags=re.I).strip()
-            elif 'i' in flags:
-                text = re.sub(
-                    repl,
-                    repl_with,
-                    to_fix,
-                    count=1,
-                    flags=re.I).strip()
-            elif 'g' in flags:
+            elif "i" in flags:
+                text = re.sub(repl, repl_with, to_fix, count=1, flags=re.I).strip()
+            elif "g" in flags:
                 text = re.sub(repl, repl_with, to_fix).strip()
             else:
                 text = re.sub(repl, repl_with, to_fix, count=1).strip()
         except sre_constants.error:
             LOGGER.warning(update.effective_message.text)
             LOGGER.exception("SRE constant error")
-            update.effective_message.reply_text(
-                "Do you even sed? Apparently not.")
+            update.effective_message.reply_text("Do you even sed? Apparently not.")
             return
 
         # empty string errors -_-
         if len(text) >= telegram.MAX_MESSAGE_LENGTH:
             update.effective_message.reply_text(
                 "The result of the sed command was too long for \
-                                                telegram!")
+                                                telegram!"
+            )
         elif text:
             update.effective_message.reply_to_message.reply_text(text)
 
@@ -124,12 +123,15 @@ larger than {}.
 *Reminder:* Sed uses some special characters to make matching easier, such as these: `+*.?\\`
 If you want to use these characters, make sure you escape them!
 eg: \\?.
-""".format(telegram.MAX_MESSAGE_LENGTH)
+""".format(
+    telegram.MAX_MESSAGE_LENGTH
+)
 
 __mod_name__ = "Regex"
 
 
 SED_HANDLER = DisableAbleRegexHandler(
-    r's([{}]).*?\1.*'.format("".join(DELIMITERS)), sed, friendly="sed")
+    r"s([{}]).*?\1.*".format("".join(DELIMITERS)), sed, friendly="sed"
+)
 
 dispatcher.add_handler(SED_HANDLER)

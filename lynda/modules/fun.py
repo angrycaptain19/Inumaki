@@ -27,7 +27,11 @@ def slap(update: Update, context: CallbackContext):
     args = context.args
     message = update.effective_message
     chat = update.effective_chat
-    reply_text = message.reply_to_message.reply_text if message.reply_to_message else message.reply_text
+    reply_text = (
+        message.reply_to_message.reply_text
+        if message.reply_to_message
+        else message.reply_text
+    )
     curr_user = html.escape(message.from_user.first_name)
     user_id = extract_user(message, args)
 
@@ -45,7 +49,8 @@ def slap(update: Update, context: CallbackContext):
                     chat.id,
                     message.from_user.id,
                     until_date=mutetime,
-                    can_send_messages=False)
+                    can_send_messages=False,
+                )
             reply_text(temp[0])
         else:
             reply_text(temp)
@@ -64,12 +69,7 @@ def slap(update: Update, context: CallbackContext):
     hit = random.choice(fun_strings.HIT)
     throw = random.choice(fun_strings.THROW)
 
-    reply = temp.format(
-        user1=user1,
-        user2=user2,
-        item=item,
-        hits=hit,
-        throws=throw)
+    reply = temp.format(user1=user1, user2=user2, item=item, hits=hit, throws=throw)
 
     reply_text(reply, parse_mode=ParseMode.HTML)
 
@@ -99,20 +99,28 @@ def hug(update: Update, _):
 @run_async
 def insult(update: Update, _):
     msg = update.effective_message
-    reply_text = msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
+    reply_text = (
+        msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
+    )
     reply_text(random.choice(fun_strings.INSULT_STRINGS))
 
 
 @run_async
 def shrug(update: Update, _):
     msg = update.effective_message
-    reply_text = msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
+    reply_text = (
+        msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
+    )
     reply_text(r"¯\_(ツ)_/¯")
 
 
 @run_async
 def table(update: Update, _):
-    reply_text = update.effective_message.reply_to_message.reply_text if update.effective_message.reply_to_message else update.effective_message.reply_text
+    reply_text = (
+        update.effective_message.reply_to_message.reply_text
+        if update.effective_message.reply_to_message
+        else update.effective_message.reply_text
+    )
     reply_text(random.choice(fun_strings.TABLE))
 
 
@@ -148,13 +156,7 @@ dispatcher.add_handler(HUG_HANDLER)
 
 __mod_name__ = "Fun"
 
-__command_list__ = [
-    "slap",
-    "shrug",
-    "table",
-    "insult",
-    "pat",
-    "hug"]
+__command_list__ = ["slap", "shrug", "table", "insult", "pat", "hug"]
 
 __handlers__ = [
     SLAP_HANDLER,
@@ -162,4 +164,5 @@ __handlers__ = [
     TABLE_HANDLER,
     INSULT_HANDLER,
     PAT_HANDLER,
-    HUG_HANDLER]
+    HUG_HANDLER,
+]

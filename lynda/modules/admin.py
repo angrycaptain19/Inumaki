@@ -9,7 +9,13 @@ from telegram.utils.helpers import mention_html
 
 from lynda import dispatcher, TOKEN
 from lynda.modules.disable import DisableAbleCommandHandler
-from lynda.modules.helper_funcs.chat_status import bot_admin, can_promote, user_admin, can_pin, connection_status
+from lynda.modules.helper_funcs.chat_status import (
+    bot_admin,
+    can_promote,
+    user_admin,
+    can_pin,
+    connection_status,
+)
 from lynda.modules.helper_funcs.extraction import extract_user, extract_user_and_text
 from lynda.modules.log_channel import loggable
 
@@ -38,7 +44,7 @@ def promote(update: Update, context: CallbackContext) -> str:
     except Exception:
         return log_message
 
-    if user_member.status in ['administrator', 'creator']:
+    if user_member.status in ["administrator", "creator"]:
         message.reply_text("How am I meant to promote someone that's already an admin?")
         return log_message
 
@@ -51,7 +57,8 @@ def promote(update: Update, context: CallbackContext) -> str:
 
     try:
         context.bot.promoteChatMember(
-            chat.id, user_id,
+            chat.id,
+            user_id,
             can_change_info=bot_member.can_change_info,
             can_post_messages=bot_member.can_post_messages,
             can_edit_messages=bot_member.can_edit_messages,
@@ -59,20 +66,26 @@ def promote(update: Update, context: CallbackContext) -> str:
             can_invite_users=bot_member.can_invite_users,
             # can_promote_members=bot_member.can_promote_members,
             can_restrict_members=bot_member.can_restrict_members,
-            can_pin_messages=bot_member.can_pin_messages)
+            can_pin_messages=bot_member.can_pin_messages,
+        )
     except BadRequest as err:
-        if err.message == 'User_not_mutual_contact':
+        if err.message == "User_not_mutual_contact":
             message.reply_text("I can't promote someone who isn't in the group.")
         else:
-            message.reply_text('An error occured while promoting.')
+            message.reply_text("An error occured while promoting.")
         return log_message
-    context.bot.sendMessage(chat.id, f"Sucessfully promoted <b>{user_member.user.first_name or user_id}</b>!",
-                    parse_mode=ParseMode.HTML)
+    context.bot.sendMessage(
+        chat.id,
+        f"Sucessfully promoted <b>{user_member.user.first_name or user_id}</b>!",
+        parse_mode=ParseMode.HTML,
+    )
 
-    log_message += (f"<b>{html.escape(chat.title)}:</b>\n"
-                    "#PROMOTED\n"
-                    f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                    f"<b>User:</b> {mention_html(user_member.user.id, user_member.user.first_name)}")
+    log_message += (
+        f"<b>{html.escape(chat.title)}:</b>\n"
+        "#PROMOTED\n"
+        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+        f"<b>User:</b> {mention_html(user_member.user.id, user_member.user.first_name)}"
+    )
 
     return log_message
 
@@ -101,11 +114,11 @@ def demote(update: Update, context: CallbackContext) -> str:
         print(e)
         return log_message
 
-    if user_member.status == 'creator':
+    if user_member.status == "creator":
         message.reply_text("This person CREATED the chat, how would I demote them?")
         return log_message
 
-    if user_member.status != 'administrator':
+    if user_member.status != "administrator":
         message.reply_text("Can't demote what wasn't promoted!")
         return log_message
 
@@ -115,7 +128,8 @@ def demote(update: Update, context: CallbackContext) -> str:
 
     try:
         context.bot.promoteChatMember(
-            chat.id, user_id,
+            chat.id,
+            user_id,
             can_change_info=False,
             can_post_messages=False,
             can_edit_messages=False,
@@ -123,20 +137,28 @@ def demote(update: Update, context: CallbackContext) -> str:
             can_invite_users=False,
             can_restrict_members=False,
             can_pin_messages=False,
-            can_promote_members=False)
+            can_promote_members=False,
+        )
 
-        context.bot.sendMessage(chat.id, f"Sucessfully demoted <b>{user_member.user.first_name or user_id}</b>!",
-                        parse_mode=ParseMode.HTML)
+        context.bot.sendMessage(
+            chat.id,
+            f"Sucessfully demoted <b>{user_member.user.first_name or user_id}</b>!",
+            parse_mode=ParseMode.HTML,
+        )
 
-        log_message += (f"<b>{html.escape(chat.title)}:</b>\n"
-                        f"#DEMOTED\n"
-                        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                        f"<b>User:</b> {mention_html(user_member.user.id, user_member.user.first_name)}")
+        log_message += (
+            f"<b>{html.escape(chat.title)}:</b>\n"
+            f"#DEMOTED\n"
+            f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+            f"<b>User:</b> {mention_html(user_member.user.id, user_member.user.first_name)}"
+        )
 
         return log_message
     except BadRequest:
-        message.reply_text("Could not demote. I might not be admin, or the admin status was appointed by another"
-                        "user, so I can't act upon them!")
+        message.reply_text(
+            "Could not demote. I might not be admin, or the admin status was appointed by another"
+            "user, so I can't act upon them!"
+        )
         return log_message
 
 
@@ -162,16 +184,22 @@ def set_title(update: Update, context: CallbackContext):
         message.reply_text("You don't seem to be referring to a user.")
         return
 
-    if user_member.status == 'creator':
-        message.reply_text("This person CREATED the chat, how can i set custom title for him?")
+    if user_member.status == "creator":
+        message.reply_text(
+            "This person CREATED the chat, how can i set custom title for him?"
+        )
         return
 
-    if user_member.status != 'administrator':
-        message.reply_text("Can't set title for non-admins!\nPromote them first to set custom title!")
+    if user_member.status != "administrator":
+        message.reply_text(
+            "Can't set title for non-admins!\nPromote them first to set custom title!"
+        )
         return
 
     if user_id == context.bot.id:
-        message.reply_text("I can't set my own title myself! Get the one who made me admin to do it for me.")
+        message.reply_text(
+            "I can't set my own title myself! Get the one who made me admin to do it for me."
+        )
         return
 
     if not title:
@@ -179,22 +207,34 @@ def set_title(update: Update, context: CallbackContext):
         return
 
     if len(title) > 16:
-        message.reply_text("The title length is longer than 16 characters.\nTruncating it to 16 characters.")
+        message.reply_text(
+            "The title length is longer than 16 characters.\nTruncating it to 16 characters."
+        )
 
     result = requests.post(
         f"https://api.telegram.org/bot{TOKEN}/setChatAdministratorCustomTitle"
         f"?chat_id={chat.id}"
         f"&user_id={user_id}"
-        f"&custom_title={title}")
+        f"&custom_title={title}"
+    )
     status = result.json()["ok"]
 
     if status is True:
-        context.bot.sendMessage(chat.id, f"Sucessfully set title for <code>{user_member.user.first_name or user_id}</code> "
-                                f"to <code>{title[:16]}</code>!", parse_mode=ParseMode.HTML)
+        context.bot.sendMessage(
+            chat.id,
+            f"Sucessfully set title for <code>{user_member.user.first_name or user_id}</code> "
+            f"to <code>{title[:16]}</code>!",
+            parse_mode=ParseMode.HTML,
+        )
     else:
         description = result.json()["description"]
-        if description == "Bad Request: not enough rights to change custom title of the user":
-            message.reply_text("I can't set custom title for admins that I didn't promote!")
+        if (
+            description
+            == "Bad Request: not enough rights to change custom title of the user"
+        ):
+            message.reply_text(
+                "I can't set custom title for admins that I didn't promote!"
+            )
 
 
 @run_async
@@ -212,11 +252,17 @@ def pin(update: Update, context: CallbackContext) -> str:
 
     is_silent = True
     if len(args) >= 1:
-        is_silent = not (args[0].lower() == 'notify' or args[0].lower() == 'loud' or args[0].lower() == 'violent')
+        is_silent = not (
+            args[0].lower() == "notify"
+            or args[0].lower() == "loud"
+            or args[0].lower() == "violent"
+        )
 
     if prev_message and is_group:
         try:
-            context.bot.pinChatMessage(chat.id, prev_message.message_id, disable_notification=is_silent)
+            context.bot.pinChatMessage(
+                chat.id, prev_message.message_id, disable_notification=is_silent
+            )
         except BadRequest as excp:
             if excp.message == "Chat_not_modified":
                 pass
@@ -225,7 +271,8 @@ def pin(update: Update, context: CallbackContext) -> str:
         log_message = (
             f"<b>{html.escape(chat.title)}:</b>\n"
             f"#PINNED\n"
-            f"<b>Admin:</b> {mention_html(user.id, user.first_name)}")
+            f"<b>Admin:</b> {mention_html(user.id, user.first_name)}"
+        )
 
         return log_message
 
@@ -250,7 +297,8 @@ def unpin(update: Update, context: CallbackContext) -> str:
     log_message = (
         f"<b>{html.escape(chat.title)}:</b>\n"
         f"#UNPINNED\n"
-        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}")
+        f"<b>Admin:</b> {mention_html(user.id, user.first_name)}"
+    )
 
     return log_message
 
@@ -269,9 +317,13 @@ def invite(update: Update, context: CallbackContext):
             invitelink = context.bot.exportChatInviteLink(chat.id)
             update.effective_message.reply_text(invitelink)
         else:
-            update.effective_message.reply_text("I don't have access to the invite link, try changing my permissions!")
+            update.effective_message.reply_text(
+                "I don't have access to the invite link, try changing my permissions!"
+            )
     else:
-        update.effective_message.reply_text("I can only give you invite links for supergroups and channels, sorry!")
+        update.effective_message.reply_text(
+            "I can only give you invite links for supergroups and channels, sorry!"
+        )
 
 
 @run_async
@@ -301,7 +353,10 @@ def adminlist(update: Update, context: CallbackContext):
 
 
 def __chat_settings__(chat_id, user_id):
-    return "You are *admin*: `{}`".format(dispatcher.bot.get_chat_member(chat_id, user_id).status in ("administrator", "creator"))
+    return "You are *admin*: `{}`".format(
+        dispatcher.bot.get_chat_member(chat_id, user_id).status
+        in ("administrator", "creator")
+    )
 
 
 __help__ = """
@@ -344,5 +399,12 @@ dispatcher.add_handler(SET_TITLE_HANDLER)
 
 __mod_name__ = "Admin"
 __command_list__ = ["adminlist", "admins", "invitelink"]
-__handlers__ = [ADMINLIST_HANDLER, PIN_HANDLER, UNPIN_HANDLER,
-                INVITE_HANDLER, PROMOTE_HANDLER, DEMOTE_HANDLER, SET_TITLE_HANDLER]
+__handlers__ = [
+    ADMINLIST_HANDLER,
+    PIN_HANDLER,
+    UNPIN_HANDLER,
+    INVITE_HANDLER,
+    PROMOTE_HANDLER,
+    DEMOTE_HANDLER,
+    SET_TITLE_HANDLER,
+]

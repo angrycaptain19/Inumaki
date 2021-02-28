@@ -9,7 +9,15 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters, CallbackContext
 from telegram.utils.helpers import mention_html
 
-from lynda import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, DEV_USERS, SARDEGNA_USERS, WHITELIST_USERS
+from lynda import (
+    dispatcher,
+    OWNER_ID,
+    SUDO_USERS,
+    SUPPORT_USERS,
+    DEV_USERS,
+    SARDEGNA_USERS,
+    WHITELIST_USERS,
+)
 from lynda.__main__ import STATS, USER_INFO, TOKEN
 from lynda.modules.disable import DisableAbleCommandHandler
 from lynda.modules.helper_funcs.chat_status import user_admin, sudo_plus
@@ -40,6 +48,7 @@ This will create two buttons on a single line, instead of one button per line.
 Keep in mind that your message <b>MUST</b> contain some text other than just a button!
 """
 
+
 @run_async
 def get_id(update: Update, context: CallbackContext):
     args = context.args
@@ -59,25 +68,29 @@ def get_id(update: Update, context: CallbackContext):
                 f" has an ID of <code>{user2.id}</code>.\n"
                 f"The forwarder, {html.escape(user1.first_name)},"
                 f" has an ID of <code>{user1.id}</code>.",
-                parse_mode=ParseMode.HTML)
+                parse_mode=ParseMode.HTML,
+            )
 
         else:
 
             user = bot.get_chat(user_id)
             msg.reply_text(
                 f"{html.escape(user.first_name)}'s id is <code>{user.id}</code>.",
-                parse_mode=ParseMode.HTML)
+                parse_mode=ParseMode.HTML,
+            )
 
     else:
 
         chat = update.effective_chat
         if chat.type == "private":
-            msg.reply_text(f"Your id is <code>{chat.id}</code>.",
-                        parse_mode=ParseMode.HTML)
+            msg.reply_text(
+                f"Your id is <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
+            )
 
         else:
-            msg.reply_text(f"This group's id is <code>{chat.id}</code>.",
-                        parse_mode=ParseMode.HTML)
+            msg.reply_text(
+                f"This group's id is <code>{chat.id}</code>.", parse_mode=ParseMode.HTML
+            )
 
 
 @run_async
@@ -86,10 +99,10 @@ def gifid(update: Update, _):
     if msg.reply_to_message and msg.reply_to_message.animation:
         update.effective_message.reply_text(
             f"Gif ID:\n<code>{msg.reply_to_message.animation.file_id}</code>",
-            parse_mode=ParseMode.HTML)
+            parse_mode=ParseMode.HTML,
+        )
     else:
-        update.effective_message.reply_text(
-            "Please reply to a gif to get its ID.")
+        update.effective_message.reply_text("Please reply to a gif to get its ID.")
 
 
 @run_async
@@ -119,9 +132,11 @@ def info(update: Update, context: CallbackContext):
     else:
         return
 
-    text = (f"<b>Characteristics:</b>\n"
-            f"ID: <code>{user.id}</code>\n"
-            f"First Name: {html.escape(user.first_name)}")
+    text = (
+        f"<b>Characteristics:</b>\n"
+        f"ID: <code>{user.id}</code>\n"
+        f"First Name: {html.escape(user.first_name)}"
+    )
 
     if user.last_name:
         text += f"\nLast Name: {html.escape(user.last_name)}"
@@ -136,30 +151,29 @@ def info(update: Update, context: CallbackContext):
 
     try:
         user_member = chat.get_member(user.id)
-        if user_member.status == 'administrator':
+        if user_member.status == "administrator":
             result = requests.post(
-                f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id={chat.id}&user_id={user.id}")
+                f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id={chat.id}&user_id={user.id}"
+            )
             result = result.json()["result"]
             if "custom_title" in result.keys():
-                custom_title = result['custom_title']
+                custom_title = result["custom_title"]
                 text += f"\nThis user holds the title <b>{custom_title}</b> here."
     except BadRequest:
         pass
 
-
     if user.id == OWNER_ID:
-            text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">God</a>'
+        text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">God</a>'
     elif user.id in DEV_USERS:
-            text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Hero Union</a>'
+        text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Hero Union</a>'
     elif user.id in SUDO_USERS:
-            text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Royal</a>'
+        text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Royal</a>'
     elif user.id in SUPPORT_USERS:
-            text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Sakura</a>'
+        text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Sakura</a>'
     elif user.id in SARDEGNA_USERS:
-            text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Sardegna</a>'
+        text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Sardegna</a>'
     elif user.id in WHITELIST_USERS:
-            text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Neptunia</a>'
-
+        text += f'\nThe Nation level of this person is <a href="https://t.me/lyndarobot?start=nations">Neptunia</a>'
 
     text += "\n"
     for mod in USER_INFO:
@@ -174,9 +188,8 @@ def info(update: Update, context: CallbackContext):
             text += "\n" + mod_info
 
     update.effective_message.reply_text(
-        text,
-        parse_mode=ParseMode.HTML,
-        disable_web_page_preview=True)
+        text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+    )
 
 
 @run_async
@@ -186,8 +199,9 @@ def ping(update: Update, _):
     message = msg.reply_text("Pinging...")
     end_time = time.time()
     ping_time = round((end_time - start_time) * 1000, 3)
-    message.edit_text("*Pong!!!*\n`{}ms`".format(ping_time),
-                    parse_mode=ParseMode.MARKDOWN)
+    message.edit_text(
+        "*Pong!!!*\n`{}ms`".format(ping_time), parse_mode=ParseMode.MARKDOWN
+    )
 
 
 @run_async
@@ -206,21 +220,22 @@ def echo(update: Update, _):
 
 @run_async
 def markdown_help(update: Update, _):
+    update.effective_message.reply_text(MARKDOWN_HELP, parse_mode=ParseMode.HTML)
     update.effective_message.reply_text(
-        MARKDOWN_HELP, parse_mode=ParseMode.HTML)
-    update.effective_message.reply_text(
-        "Try forwarding the following message to me, and you'll see!")
+        "Try forwarding the following message to me, and you'll see!"
+    )
     update.effective_message.reply_text(
         "/save test This is a markdown test. _italics_, *bold*, `code`, "
         "[URL](example.com) [button](buttonurl:github.com) "
-        "[button2](buttonurl://google.com:same)")
+        "[button2](buttonurl://google.com:same)"
+    )
 
 
 @run_async
 @sudo_plus
 def stats(update: Update, _):
     stats = "Current stats:\n" + "\n".join(mod.__stats__() for mod in STATS)
-    result = re.sub(r'(\d+)', r'<code>\1</code>', stats)
+    result = re.sub(r"(\d+)", r"<code>\1</code>", stats)
     r = requests.get("https://api.waa.ai/v2/links/Lynda").json()
     result += f"\nClicks on Repository: {r['data']['clicks']}"
     update.effective_message.reply_text(result, parse_mode=ParseMode.HTML)
@@ -242,10 +257,7 @@ GIFID_HANDLER = DisableAbleCommandHandler("gifid", gifid)
 PING_HANDLER = DisableAbleCommandHandler("ping", ping)
 INFO_HANDLER = DisableAbleCommandHandler("info", info, pass_args=True)
 ECHO_HANDLER = DisableAbleCommandHandler("echo", echo, filters=Filters.group)
-MD_HELP_HANDLER = CommandHandler(
-    "markdownhelp",
-    markdown_help,
-    filters=Filters.private)
+MD_HELP_HANDLER = CommandHandler("markdownhelp", markdown_help, filters=Filters.private)
 STATS_HANDLER = CommandHandler("stats", stats)
 
 dispatcher.add_handler(ID_HANDLER)
@@ -264,5 +276,5 @@ __handlers__ = [
     INFO_HANDLER,
     ECHO_HANDLER,
     MD_HELP_HANDLER,
-    STATS_HANDLER
+    STATS_HANDLER,
 ]

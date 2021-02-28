@@ -9,7 +9,12 @@ from telegram.utils.helpers import mention_html
 
 from lynda import dispatcher, LOGGER, SARDEGNA_USERS
 from lynda.modules.helper_funcs.chat_status import (
-    bot_admin, user_admin, is_user_admin, can_restrict, connection_status)
+    bot_admin,
+    user_admin,
+    is_user_admin,
+    can_restrict,
+    connection_status,
+)
 from lynda.modules.helper_funcs.extraction import extract_user, extract_user_and_text
 from lynda.modules.helper_funcs.string_handling import extract_time
 from lynda.modules.log_channel import loggable
@@ -66,7 +71,8 @@ def mute(update: Update, context: CallbackContext) -> str:
         f"<b>{html.escape(chat.title)}:</b>\n"
         f"#MUTE\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}")
+        f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}"
+    )
 
     if reason:
         log += f"\n<b>Reason:</b> {reason}"
@@ -76,7 +82,8 @@ def mute(update: Update, context: CallbackContext) -> str:
         bot.sendMessage(
             chat.id,
             f"Muted <b>{html.escape(member.user.first_name)}</b> with no expiration date!",
-            parse_mode=ParseMode.HTML)
+            parse_mode=ParseMode.HTML,
+        )
         return log
 
     else:
@@ -99,38 +106,47 @@ def unmute(update: Update, context: CallbackContext) -> str:
     user_id = extract_user(message, args)
     if not user_id:
         message.reply_text(
-            "You'll need to either give me a username to unmute, or reply to someone to be unmuted.")
+            "You'll need to either give me a username to unmute, or reply to someone to be unmuted."
+        )
         return ""
 
     member = chat.get_member(int(user_id))
 
-    if member.status in ['kicked', 'left']:
+    if member.status in ["kicked", "left"]:
         message.reply_text(
             "This user isn't even in the chat, unmuting them won't make them talk more than they "
-            "already do!")
+            "already do!"
+        )
 
     else:
-        if (member.can_send_messages
-                and member.can_send_media_messages
-                and member.can_send_other_messages
-                and member.can_add_web_page_previews):
+        if (
+            member.can_send_messages
+            and member.can_send_media_messages
+            and member.can_send_other_messages
+            and member.can_add_web_page_previews
+        ):
             message.reply_text("This user already has the right to speak.")
         else:
-            bot.restrict_chat_member(chat.id, int(user_id),
-                                     can_send_messages=True,
-                                     can_send_media_messages=True,
-                                     can_send_other_messages=True,
-                                     can_add_web_page_previews=True)
+            bot.restrict_chat_member(
+                chat.id,
+                int(user_id),
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+            )
             bot.sendMessage(
                 chat.id,
                 f"I shall allow <b>{html.escape(member.user.first_name)}</b> to text!",
-                parse_mode=ParseMode.HTML)
+                parse_mode=ParseMode.HTML,
+            )
             user = update.effective_user
             return (
                 f"<b>{html.escape(chat.title)}:</b>\n"
                 f"#UNMUTE\n"
                 f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}")
+                f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}"
+            )
     return ""
 
 
@@ -157,8 +173,7 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
     member = chat.get_member(user_id)
 
     if not reason:
-        message.reply_text(
-            "You haven't specified a time to mute this user for!")
+        message.reply_text("You haven't specified a time to mute this user for!")
         return ""
 
     split_reason = reason.split(None, 1)
@@ -175,21 +190,21 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
         f"#TEMP MUTED\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
         f"<b>User:</b> {mention_html(member.user.id, member.user.first_name)}\n"
-        f"<b>Time:</b> {time_val}")
+        f"<b>Time:</b> {time_val}"
+    )
     if reason:
         log += f"\n<b>Reason:</b> {reason}"
 
     try:
         if member.can_send_messages is None or member.can_send_messages:
             bot.restrict_chat_member(
-                chat.id,
-                user_id,
-                until_date=mutetime,
-                can_send_messages=False)
+                chat.id, user_id, until_date=mutetime, can_send_messages=False
+            )
             bot.sendMessage(
                 chat.id,
                 f"Muted <b>{html.escape(member.user.first_name)}</b> for {time_val}!",
-                parse_mode=ParseMode.HTML)
+                parse_mode=ParseMode.HTML,
+            )
             return log
         else:
             message.reply_text("This user is already muted.")
@@ -206,7 +221,8 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
                 user_id,
                 chat.title,
                 chat.id,
-                excp.message)
+                excp.message,
+            )
             message.reply_text("Well damn, I can't mute that user.")
 
     return ""
@@ -224,8 +240,7 @@ unmutes a user. Can also be used as a reply, muting the replied to user.
 
 MUTE_HANDLER = CommandHandler("mute", mute, pass_args=True)
 UNMUTE_HANDLER = CommandHandler("unmute", unmute, pass_args=True)
-TEMPMUTE_HANDLER = CommandHandler(
-    ["tmute", "tempmute"], temp_mute, pass_args=True)
+TEMPMUTE_HANDLER = CommandHandler(["tmute", "tempmute"], temp_mute, pass_args=True)
 
 dispatcher.add_handler(MUTE_HANDLER)
 dispatcher.add_handler(UNMUTE_HANDLER)

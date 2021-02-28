@@ -46,34 +46,50 @@ def split_message(msg: str) -> List[str]:
 def paginate_modules(_page_n: int, module_dict: Dict, prefix, chat=None) -> List:
     if not chat:
         modules = sorted(
-            [EqInlineKeyboardButton(x.__mod_name__,
-                                    callback_data="{}_module({})".format(prefix, x.__mod_name__.lower())) for x
-            in module_dict.values()])
+            [
+                EqInlineKeyboardButton(
+                    x.__mod_name__,
+                    callback_data="{}_module({})".format(
+                        prefix, x.__mod_name__.lower()
+                    ),
+                )
+                for x in module_dict.values()
+            ]
+        )
     else:
         modules = sorted(
-            [EqInlineKeyboardButton(x.__mod_name__,
-                                    callback_data="{}_module({},{})".format(prefix, chat, x.__mod_name__.lower())) for x
-            in module_dict.values()])
-    pairs = [
-    modules[i * 3:(i + 1) * 3] for i in range((len(modules) + 3 - 1) // 3)
-    ]
+            [
+                EqInlineKeyboardButton(
+                    x.__mod_name__,
+                    callback_data="{}_module({},{})".format(
+                        prefix, chat, x.__mod_name__.lower()
+                    ),
+                )
+                for x in module_dict.values()
+            ]
+        )
+    pairs = [modules[i * 3 : (i + 1) * 3] for i in range((len(modules) + 3 - 1) // 3)]
     round_num = len(modules) / 3
     calc = len(modules) - round(round_num)
     if calc == 1:
-        pairs.append((modules[-1], ))
+        pairs.append((modules[-1],))
     elif calc == 2:
-        pairs.append((modules[-1], ))
+        pairs.append((modules[-1],))
 
     return pairs
 
 
-def send_to_list(context: CallbackContext, send_to: list, message: str, markdown=False, html=False) -> None:
+def send_to_list(
+    context: CallbackContext, send_to: list, message: str, markdown=False, html=False
+) -> None:
     if html and markdown:
         raise Exception("Can only send with either markdown or HTML!")
     for user_id in set(send_to):
         try:
             if markdown:
-                context.bot.send_message(user_id, message, parse_mode=ParseMode.MARKDOWN)
+                context.bot.send_message(
+                    user_id, message, parse_mode=ParseMode.MARKDOWN
+                )
             elif html:
                 context.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
             else:
@@ -107,7 +123,11 @@ def revert_buttons(buttons):
 def is_module_loaded(name):
     return name not in NO_LOAD
 
+
 def sendMessage(text: str, context: CallbackContext, update: Update):
-    return context.bot.send_message(update.message.chat_id,
-                                    reply_to_message_id=update.message.message_id,
-                                    text=text, parse_mode=ParseMode.HTML)
+    return context.bot.send_message(
+        update.message.chat_id,
+        reply_to_message_id=update.message.message_id,
+        text=text,
+        parse_mode=ParseMode.HTML,
+    )

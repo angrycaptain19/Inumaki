@@ -9,13 +9,10 @@ import wikipedia
 def wiki(update: Update, context: CallbackContext):
     args = context.args
     reply = " ".join(args)
-    summary = '{} {}'
+    summary = "{} {}"
     update.message.reply_text(
-        summary.format(
-            wikipedia.summary(
-                reply,
-                sentences=3),
-            wikipedia.page(reply).url))
+        summary.format(wikipedia.summary(reply, sentences=3), wikipedia.page(reply).url)
+    )
 
 
 __help__ = """

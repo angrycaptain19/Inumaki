@@ -19,17 +19,17 @@ sequel_btn = "Sequel ➡️"
 close_btn = "Close ❌"
 
 
-def shorten(description, info = 'anilist.co'):
-    msg = "" 
+def shorten(description, info="anilist.co"):
+    msg = ""
     if len(description) > 700:
-           description = description[0:500] + '....'
-           msg += f"\n*Description*: _{description}_[Read More]({info})"
+        description = description[0:500] + "...."
+        msg += f"\n*Description*: _{description}_[Read More]({info})"
     else:
-          msg += f"\n*Description*:_{description}_"
+        msg += f"\n*Description*:_{description}_"
     return msg
 
 
-#time formatter from uniborg
+# time formatter from uniborg
 def t(milliseconds: int) -> str:
     """Inputs time in milliseconds, to get beautified time,
     as string"""
@@ -37,14 +37,17 @@ def t(milliseconds: int) -> str:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
-    tmp = ((str(days) + " Days, ") if days else "") + \
-        ((str(hours) + " Hours, ") if hours else "") + \
-        ((str(minutes) + " Minutes, ") if minutes else "") + \
-        ((str(seconds) + " Seconds, ") if seconds else "") + \
-        ((str(milliseconds) + " ms, ") if milliseconds else "")
+    tmp = (
+        ((str(days) + " Days, ") if days else "")
+        + ((str(hours) + " Hours, ") if hours else "")
+        + ((str(minutes) + " Minutes, ") if minutes else "")
+        + ((str(seconds) + " Seconds, ") if seconds else "")
+        + ((str(milliseconds) + " ms, ") if milliseconds else "")
+    )
     return tmp[:-2]
-    
-airing_query = '''
+
+
+airing_query = """
     query ($id: Int,$search: String) { 
         Media (id: $id, type: ANIME,search: $search) { 
             id
@@ -61,7 +64,7 @@ airing_query = '''
         } 
     }
 }
-'''
+"""
 
 fav_query = """
 query ($id: Int) { 
@@ -76,7 +79,7 @@ query ($id: Int) {
 }
 """
 
-anime_query = '''
+anime_query = """
     query ($id: Int,$search: String) { 
         Media (id: $id, type: ANIME,search: $search) { 
             id
@@ -111,7 +114,7 @@ anime_query = '''
         bannerImage
     }
 }
-'''
+"""
 character_query = """
     query ($query: String) {
         Character (search: $query) {
@@ -155,109 +158,171 @@ query ($id: Int,$search: String) {
 """
 
 
-url = 'https://graphql.anilist.co'
+url = "https://graphql.anilist.co"
 
 
 @run_async
 def anime(update: Update, context: CallbackContext):
     message = update.effective_message
-    search = message.text.split(' ', 1)
-    if len(search) == 1: return
-    else: search = search[1]
-    variables = {'search' : search}
-    json = requests.post(url, json={'query': anime_query, 'variables': variables}).json()['data'].get('Media', None)
+    search = message.text.split(" ", 1)
+    if len(search) == 1:
+        return
+    else:
+        search = search[1]
+    variables = {"search": search}
+    json = (
+        requests.post(url, json={"query": anime_query, "variables": variables})
+        .json()["data"]
+        .get("Media", None)
+    )
     if json:
         msg = f"*{json['title']['romaji']}*(`{json['title']['native']}`)\n*Type*: {json['format']}\n*Status*: {json['status']}\n*Episodes*: {json.get('episodes', 'N/A')}\n*Duration*: {json.get('duration', 'N/A')} Per Ep.\n*Score*: {json['averageScore']}\n*Genres*: `"
-        for x in json['genres']: msg += f"{x}, "
-        msg = msg[:-2] + '`\n'
+        for x in json["genres"]:
+            msg += f"{x}, "
+        msg = msg[:-2] + "`\n"
         msg += "*Studios*: `"
-        for x in json['studios']['nodes']: msg += f"{x['name']}, " 
-        msg = msg[:-2] + '`\n'
-        info = json.get('siteUrl')
-        trailer = json.get('trailer', None)
+        for x in json["studios"]["nodes"]:
+            msg += f"{x['name']}, "
+        msg = msg[:-2] + "`\n"
+        info = json.get("siteUrl")
+        trailer = json.get("trailer", None)
         if trailer:
-            trailer_id = trailer.get('id', None)
-            site = trailer.get('site', None)
-            if site == "youtube": trailer = 'https://youtu.be/' + trailer_id
-        description = json.get('description', 'N/A').replace('<i>', '').replace('</i>', '').replace('<br>', '')
-        msg += shorten(description, info) 
-        image = json.get('bannerImage', None)
+            trailer_id = trailer.get("id", None)
+            site = trailer.get("site", None)
+            if site == "youtube":
+                trailer = "https://youtu.be/" + trailer_id
+        description = (
+            json.get("description", "N/A")
+            .replace("<i>", "")
+            .replace("</i>", "")
+            .replace("<br>", "")
+        )
+        msg += shorten(description, info)
+        image = json.get("bannerImage", None)
         if trailer:
             buttons = [
-                [InlineKeyboardButton("More Info", url=info),
-                InlineKeyboardButton("Trailer 🎬", url=trailer)]
+                [
+                    InlineKeyboardButton("More Info", url=info),
+                    InlineKeyboardButton("Trailer 🎬", url=trailer),
                 ]
-        else:
-            buttons = [
-                [InlineKeyboardButton("More Info", url=info)]
             ]
+        else:
+            buttons = [[InlineKeyboardButton("More Info", url=info)]]
         if image:
             try:
-                update.effective_message.reply_photo(photo = image, caption = msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(buttons))
+                update.effective_message.reply_photo(
+                    photo=image,
+                    caption=msg,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup(buttons),
+                )
             except:
                 msg += f" [〽️]({image})"
-                update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(buttons))
-        else: 
-            update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(buttons))
+                update.effective_message.reply_text(
+                    msg,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup(buttons),
+                )
+        else:
+            update.effective_message.reply_text(
+                msg,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(buttons),
+            )
+
 
 @run_async
 def character(update: Update, _):
     message = update.effective_message
-    search = message.text.split(' ', 1)
+    search = message.text.split(" ", 1)
     if len(search) == 1:
-        update.effective_message.reply_text('Format : /character < character name >') 
+        update.effective_message.reply_text("Format : /character < character name >")
         return
     search = search[1]
-    variables = {'query': search}
-    json = requests.post(url, json={'query': character_query, 'variables': variables}).json()['data'].get('Character', None)
+    variables = {"query": search}
+    json = (
+        requests.post(url, json={"query": character_query, "variables": variables})
+        .json()["data"]
+        .get("Character", None)
+    )
     if json:
         msg = f"*{json.get('name').get('full')}*(`{json.get('name').get('native')}`)\n"
         description = f"{json['description']}"
-        site_url = json.get('siteUrl')
+        site_url = json.get("siteUrl")
         msg += shorten(description, site_url)
-        image = json.get('image', None)
+        image = json.get("image", None)
         if image:
-            image = image.get('large')
-            update.effective_message.reply_photo(photo = image, caption = msg, parse_mode=ParseMode.MARKDOWN)
-        else: update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+            image = image.get("large")
+            update.effective_message.reply_photo(
+                photo=image, caption=msg, parse_mode=ParseMode.MARKDOWN
+            )
+        else:
+            update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+
 
 @run_async
 def manga(update: Update, _):
     message = update.effective_message
-    search = message.text.split(' ', 1)
+    search = message.text.split(" ", 1)
     if len(search) == 1:
-        update.effective_message.reply_text('Format : /manga < manga name >') 
+        update.effective_message.reply_text("Format : /manga < manga name >")
         return
     search = search[1]
-    variables = {'search': search}
-    json = requests.post(url, json={'query': manga_query, 'variables': variables}).json()['data'].get('Media', None)
-    msg = ''
+    variables = {"search": search}
+    json = (
+        requests.post(url, json={"query": manga_query, "variables": variables})
+        .json()["data"]
+        .get("Media", None)
+    )
+    msg = ""
     if json:
-        title, title_native = json['title'].get('romaji', False), json['title'].get('native', False)
-        start_date, status, score = json['startDate'].get('year', False), json.get('status', False), json.get('averageScore', False)
+        title, title_native = json["title"].get("romaji", False), json["title"].get(
+            "native", False
+        )
+        start_date, status, score = (
+            json["startDate"].get("year", False),
+            json.get("status", False),
+            json.get("averageScore", False),
+        )
         if title:
             msg += f"*{title}*"
             if title_native:
                 msg += f"(`{title_native}`)"
-        if start_date: msg += f"\n*Start Date* - `{start_date}`"
-        if status: msg += f"\n*Status* - `{status}`"
-        if score: msg += f"\n*Score* - `{score}`"
-        msg += '\n*Genres* - '
-        for x in json.get('genres', []): msg += f"{x}, "
+        if start_date:
+            msg += f"\n*Start Date* - `{start_date}`"
+        if status:
+            msg += f"\n*Status* - `{status}`"
+        if score:
+            msg += f"\n*Score* - `{score}`"
+        msg += "\n*Genres* - "
+        for x in json.get("genres", []):
+            msg += f"{x}, "
         msg = msg[:-2]
-        info = json['siteUrl']
-        buttons = [
-                [InlineKeyboardButton("More Info", url=info)]
-            ]
+        info = json["siteUrl"]
+        buttons = [[InlineKeyboardButton("More Info", url=info)]]
         image = json.get("bannerImage", False)
         msg += f"_{json.get('description', None)}_"
         if image:
             try:
-                update.effective_message.reply_photo(photo = image, caption = msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(buttons))
+                update.effective_message.reply_photo(
+                    photo=image,
+                    caption=msg,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup(buttons),
+                )
             except:
                 msg += f" [〽️]({image})"
-                update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(buttons))
-        else: update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(buttons))
+                update.effective_message.reply_text(
+                    msg,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup(buttons),
+                )
+        else:
+            update.effective_message.reply_text(
+                msg,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=InlineKeyboardMarkup(buttons),
+            )
 
 
 @run_async
@@ -285,63 +350,74 @@ def user(update: Update, _):
     progress_message = update.effective_message.reply_text("Searching.... ")
 
     date_format = "%Y-%m-%d"
-    if user['image_url'] is None:
+    if user["image_url"] is None:
         img = "https://cdn.myanimelist.net/images/questionmark_50.gif"
     else:
-        img = user['image_url']
+        img = user["image_url"]
 
     try:
-        user_birthday = datetime.datetime.fromisoformat(user['birthday'])
+        user_birthday = datetime.datetime.fromisoformat(user["birthday"])
         user_birthday_formatted = user_birthday.strftime(date_format)
     except:
         user_birthday_formatted = "Unknown"
 
-    user_joined_date = datetime.datetime.fromisoformat(user['joined'])
+    user_joined_date = datetime.datetime.fromisoformat(user["joined"])
     user_joined_date_formatted = user_joined_date.strftime(date_format)
 
     for entity in user:
         if user[entity] is None:
             user[entity] = "Unknown"
 
-    about = user['about'].split(" ", 60)
+    about = user["about"].split(" ", 60)
 
     try:
         about.pop(60)
     except IndexError:
         pass
 
-    about_string = ' '.join(about)
+    about_string = " ".join(about)
     about_string = about_string.replace("<br>", "").strip().replace("\r\n", "\n")
 
     caption = ""
 
-    caption += textwrap.dedent(f"""
+    caption += textwrap.dedent(
+        f"""
     *Username*: [{user['username']}]({user['url']})
     *Gender*: `{user['gender']}`
     *Birthday*: `{user_birthday_formatted}`
     *Joined*: `{user_joined_date_formatted}`
     *Days wasted watching anime*: `{user['anime_stats']['days_watched']}`
     *Days wasted reading manga*: `{user['manga_stats']['days_read']}`
-    """)
+    """
+    )
 
     caption += f"*About*: {about_string}"
 
     buttons = [
-        [InlineKeyboardButton(info_btn, url=user['url'])],
-        [InlineKeyboardButton(close_btn, callback_data=f"anime_close, {message.from_user.id}")]
+        [InlineKeyboardButton(info_btn, url=user["url"])],
+        [
+            InlineKeyboardButton(
+                close_btn, callback_data=f"anime_close, {message.from_user.id}"
+            )
+        ],
     ]
 
-    update.effective_message.reply_photo(photo=img, caption=caption, parse_mode=ParseMode.MARKDOWN,
-                                        reply_markup=InlineKeyboardMarkup(buttons), disable_web_page_preview=False)
+    update.effective_message.reply_photo(
+        photo=img,
+        caption=caption,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=InlineKeyboardMarkup(buttons),
+        disable_web_page_preview=False,
+    )
     progress_message.delete()
 
 
 @run_async
 def upcoming(update: Update, _):
     jikan = jikanpy.jikan.Jikan()
-    upcoming = jikan.top('anime', page=1, subtype="upcoming")
+    upcoming = jikan.top("anime", page=1, subtype="upcoming")
 
-    upcoming_list = [entry['title'] for entry in upcoming['top']]
+    upcoming_list = [entry["title"] for entry in upcoming["top"]]
     upcoming_message = ""
 
     for entry_num in range(len(upcoming_list)):
@@ -367,12 +443,12 @@ def site_search(update: Update, site: str):
         search_url = f"https://animekaizoku.com/?s={search_query}"
         html_text = requests.get(search_url).text
         soup = bs4.BeautifulSoup(html_text, "html.parser")
-        search_result = soup.find_all("h2", {'class': "post-title"})
+        search_result = soup.find_all("h2", {"class": "post-title"})
 
         if search_result:
             result = f"<b>Search results for</b> <code>{html.escape(search_query)}</code> <b>on</b> <code>AnimeKaizoku</code>: \n"
             for entry in search_result:
-                post_link = entry.a['href']
+                post_link = entry.a["href"]
                 post_name = html.escape(entry.text)
                 result += f"• <a href='{post_link}'>{post_name}</a>\n"
         else:
@@ -383,7 +459,7 @@ def site_search(update: Update, site: str):
         search_url = f"https://animekayo.com/?s={search_query}"
         html_text = requests.get(search_url).text
         soup = bs4.BeautifulSoup(html_text, "html.parser")
-        search_result = soup.find_all("h2", {'class': "title"})
+        search_result = soup.find_all("h2", {"class": "title"})
 
         result = f"<b>Search results for</b> <code>{html.escape(search_query)}</code> <b>on</b> <code>AnimeKayo</code>: \n"
         for entry in search_result:
@@ -393,19 +469,23 @@ def site_search(update: Update, site: str):
                 more_results = False
                 break
 
-            post_link = entry.a['href']
+            post_link = entry.a["href"]
             post_name = html.escape(entry.text.strip())
             result += f"• <a href='{post_link}'>{post_name}</a>\n"
 
-    buttons = [
-        [InlineKeyboardButton("See all results", url=search_url)]
-    ]
+    buttons = [[InlineKeyboardButton("See all results", url=search_url)]]
 
     if more_results:
-        message.reply_text(result, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(buttons),
-                            disable_web_page_preview=True)
+        message.reply_text(
+            result,
+            parse_mode=ParseMode.HTML,
+            reply_markup=InlineKeyboardMarkup(buttons),
+            disable_web_page_preview=True,
+        )
     else:
-        message.reply_text(result, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+        message.reply_text(
+            result, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+        )
 
 
 @run_async
@@ -416,7 +496,6 @@ def kaizoku(update: Update, _):
 @run_async
 def kayo(update: Update, context: CallbackContext):
     site_search(update, "kayo")
-
 
 
 ANIME_HANDLER = DisableAbleCommandHandler("anime", anime)
@@ -435,6 +514,21 @@ dispatcher.add_handler(KAIZOKU_SEARCH_HANDLER)
 dispatcher.add_handler(KAYO_SEARCH_HANDLER)
 dispatcher.add_handler(UPCOMING_HANDLER)
 
-__command_list__ = ["anime", "manga", "character", "user", "upcoming", "kaizoku", "kayo"]
-__handlers__ = [ANIME_HANDLER, CHARACTER_HANDLER, MANGA_HANDLER, USER_HANDLER, UPCOMING_HANDLER, KAIZOKU_SEARCH_HANDLER,
-                KAYO_SEARCH_HANDLER]
+__command_list__ = [
+    "anime",
+    "manga",
+    "character",
+    "user",
+    "upcoming",
+    "kaizoku",
+    "kayo",
+]
+__handlers__ = [
+    ANIME_HANDLER,
+    CHARACTER_HANDLER,
+    MANGA_HANDLER,
+    USER_HANDLER,
+    UPCOMING_HANDLER,
+    KAIZOKU_SEARCH_HANDLER,
+    KAYO_SEARCH_HANDLER,
+]
