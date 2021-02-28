@@ -8,13 +8,21 @@ from telegram.ext import CommandHandler, run_async, CallbackContext
 from telegram.utils.helpers import mention_html
 
 import lynda.modules.sql.blacklistusers_sql as sql
-from lynda import dispatcher, OWNER_ID, DEV_USERS, SUDO_USERS, WHITELIST_USERS, SUPPORT_USERS
+from lynda import (
+    dispatcher,
+    OWNER_ID,
+    DEV_USERS,
+    SUDO_USERS,
+    WHITELIST_USERS,
+    SUPPORT_USERS,
+)
 from lynda.modules.helper_funcs.chat_status import dev_plus
 from lynda.modules.helper_funcs.extraction import extract_user_and_text, extract_user
 from lynda.modules.log_channel import gloggable
 
-BLACKLISTWHITELIST = [OWNER_ID] + DEV_USERS + \
-    SUDO_USERS + WHITELIST_USERS + SUPPORT_USERS
+BLACKLISTWHITELIST = (
+    [OWNER_ID] + DEV_USERS + SUDO_USERS + WHITELIST_USERS + SUPPORT_USERS
+)
 BLABLEUSERS = [OWNER_ID] + DEV_USERS
 
 
@@ -33,8 +41,7 @@ def bl_user(update: Update, context: CallbackContext) -> str:
         return ""
 
     if user_id == context.bot.id:
-        message.reply_text(
-            "How am I supposed to do my work if I am ignoring myself?")
+        message.reply_text("How am I supposed to do my work if I am ignoring myself?")
         return ""
 
     if user_id in BLACKLISTWHITELIST:
@@ -55,7 +62,8 @@ def bl_user(update: Update, context: CallbackContext) -> str:
     log_message = (
         f"#BLACKLIST\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"<b>User:</b> {mention_html(target_user.id, target_user.first_name)}")
+        f"<b>User:</b> {mention_html(target_user.id, target_user.first_name)}"
+    )
     if reason:
         log_message += f"\n<b>Reason:</b> {reason}"
 
@@ -96,7 +104,8 @@ def unbl_user(update: Update, context: CallbackContext) -> str:
         log_message = (
             f"#UNBLACKLIST\n"
             f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>User:</b> {mention_html(target_user.id, target_user.first_name)}")
+            f"<b>User:</b> {mention_html(target_user.id, target_user.first_name)}"
+        )
 
         return log_message
 
@@ -116,13 +125,12 @@ def bl_users(update: Update, context: CallbackContext):
         reason = sql.get_reason(each_user)
 
         if reason:
-            users.append(
-                f"• {mention_html(user.id, user.first_name)} :- {reason}")
+            users.append(f"• {mention_html(user.id, user.first_name)} :- {reason}")
         else:
             users.append(f"• {mention_html(user.id, user.first_name)}")
 
     message = "<b>Blacklisted Users</b>\n"
-    message += '\n'.join(users) if users else "Noone is being ignored as of yet."
+    message += "\n".join(users) if users else "Noone is being ignored as of yet."
     update.effective_message.reply_text(message, parse_mode=ParseMode.HTML)
 
 

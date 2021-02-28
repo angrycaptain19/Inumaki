@@ -4,7 +4,13 @@ import re
 import telegram
 from telegram import Update, ParseMode, InlineKeyboardMarkup
 from telegram.error import BadRequest
-from telegram.ext import CommandHandler, MessageHandler, DispatcherHandlerStop, run_async, CallbackContext
+from telegram.ext import (
+    CommandHandler,
+    MessageHandler,
+    DispatcherHandlerStop,
+    run_async,
+    CallbackContext,
+)
 from telegram.utils.helpers import escape_markdown
 
 from lynda import dispatcher, LOGGER
@@ -13,7 +19,10 @@ from lynda.modules.helper_funcs.chat_status import user_admin, connection_status
 from lynda.modules.helper_funcs.extraction import extract_text
 from lynda.modules.helper_funcs.filters import CustomFilters
 from lynda.modules.helper_funcs.misc import build_keyboard
-from lynda.modules.helper_funcs.string_handling import split_quotes, button_markdown_parser
+from lynda.modules.helper_funcs.string_handling import (
+    split_quotes,
+    button_markdown_parser,
+)
 from lynda.modules.sql import cust_filters_sql as sql
 
 HANDLER_GROUP = 10
@@ -39,17 +48,21 @@ def list_handlers(update: Update, _):
         else:
             update.effective_message.reply_text(
                 f"No filters are active in <b>{update_chat_title}</b>!",
-                parse_mode=telegram.ParseMode.HTML)
+                parse_mode=telegram.ParseMode.HTML,
+            )
         return
 
     filter_list = ""
     for keyword in all_handlers:
         entry = f" - {escape_markdown(keyword)}\n"
-        if len(entry) + len(filter_list) + \
-                len(BASIC_FILTER_STRING) > telegram.MAX_MESSAGE_LENGTH:
+        if (
+            len(entry) + len(filter_list) + len(BASIC_FILTER_STRING)
+            > telegram.MAX_MESSAGE_LENGTH
+        ):
             filter_list = BASIC_FILTER_STRING + html.escape(filter_list)
             update.effective_message.reply_text(
-                filter_list, parse_mode=telegram.ParseMode.HTML)
+                filter_list, parse_mode=telegram.ParseMode.HTML
+            )
             filter_list = entry
         else:
             filter_list += entry
@@ -57,7 +70,8 @@ def list_handlers(update: Update, _):
     if filter_list != BASIC_FILTER_STRING:
         filter_list = BASIC_FILTER_STRING + html.escape(filter_list)
         update.effective_message.reply_text(
-            filter_list, parse_mode=telegram.ParseMode.HTML)
+            filter_list, parse_mode=telegram.ParseMode.HTML
+        )
 
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
@@ -91,11 +105,13 @@ def filters(update: Update, _):
         # set correct offset relative to command + notename
         offset = len(extracted[1]) - len(msg.text)
         content, buttons = button_markdown_parser(
-            extracted[1], entities=msg.parse_entities(), offset=offset)
+            extracted[1], entities=msg.parse_entities(), offset=offset
+        )
         content = content.strip()
         if not content:
             msg.reply_text(
-                "There is no note message - You can't JUST have buttons, you need a message to go with it!")
+                "There is no note message - You can't JUST have buttons, you need a message to go with it!"
+            )
             return
 
     elif msg.reply_to_message and msg.reply_to_message.sticker:
@@ -143,7 +159,8 @@ def filters(update: Update, _):
         is_audio,
         is_voice,
         is_video,
-        buttons)
+        buttons,
+    )
 
     msg.reply_text("Handler '{}' added!".format(keyword))
     raise DispatcherHandlerStop
@@ -172,8 +189,7 @@ def stop_filter(update: Update, _):
             msg.reply_text("Yep, I'll stop replying to that.")
             raise DispatcherHandlerStop
 
-    msg.reply_text(
-        "That's not a current filter - run /filters for all active filters.")
+    msg.reply_text("That's not a current filter - run /filters for all active filters.")
 
 
 @run_async
@@ -212,7 +228,8 @@ def reply_filter(update: Update, context: CallbackContext):
                         filt.reply,
                         parse_mode=ParseMode.MARKDOWN,
                         disable_web_page_preview=True,
-                        reply_markup=keyboard)
+                        reply_markup=keyboard,
+                    )
                 except BadRequest as excp:
                     if excp.message == "Reply message not found":
                         context.bot.send_message(
@@ -220,23 +237,27 @@ def reply_filter(update: Update, context: CallbackContext):
                             filt.reply,
                             parse_mode=ParseMode.MARKDOWN,
                             disable_web_page_preview=True,
-                            reply_markup=keyboard)
+                            reply_markup=keyboard,
+                        )
                     elif excp.message == "Unsupported url protocol":
                         message.reply_text(
                             "You seem to be trying to use an unsupported url protocol. Telegram "
                             "doesn't support buttons for some protocols, such as tg://. Please try "
-                            "again, or ask @LyndaEagleSupport for help.")
+                            "again, or ask @LyndaEagleSupport for help."
+                        )
                     else:
                         message.reply_text(
                             "This note could not be sent, as it is incorrectly formatted. Ask in "
-                            "@LyndaEagleSupport if you can't figure out why!")
+                            "@LyndaEagleSupport if you can't figure out why!"
+                        )
                         LOGGER.warning(
-                            "Message %s could not be parsed", str(
-                                filt.reply))
+                            "Message %s could not be parsed", str(filt.reply)
+                        )
                         LOGGER.exception(
-                            "Could not parse filter %s in chat %s", str(
-                                filt.keyword), str(
-                                chat.id))
+                            "Could not parse filter %s in chat %s",
+                            str(filt.keyword),
+                            str(chat.id),
+                        )
 
             else:
                 # LEGACY - all new filters will have has_markdown set to True.
@@ -245,8 +266,7 @@ def reply_filter(update: Update, context: CallbackContext):
 
 
 def __stats__():
-    return "{} filters, across {} chats.".format(
-        sql.num_filters(), sql.num_chats())
+    return "{} filters, across {} chats.".format(sql.num_filters(), sql.num_chats())
 
 
 def __migrate__(old_chat_id, new_chat_id):
@@ -255,8 +275,7 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, _user_id):
     cust_filters = sql.get_chat_triggers(chat_id)
-    return "There are currently `{}` custom filters here.".format(
-        len(cust_filters))
+    return "There are currently `{}` custom filters here.".format(len(cust_filters))
 
 
 __help__ = """
@@ -275,8 +294,7 @@ stop that filter.
 
 FILTER_HANDLER = CommandHandler("filter", filters)
 STOP_HANDLER = CommandHandler("stop", stop_filter)
-LIST_HANDLER = DisableAbleCommandHandler(
-    "filters", list_handlers, admin_ok=True)
+LIST_HANDLER = DisableAbleCommandHandler("filters", list_handlers, admin_ok=True)
 CUST_FILTER_HANDLER = MessageHandler(CustomFilters.has_text, reply_filter)
 
 dispatcher.add_handler(FILTER_HANDLER)
@@ -289,5 +307,5 @@ __handlers__ = [
     FILTER_HANDLER,
     STOP_HANDLER,
     LIST_HANDLER,
-    (CUST_FILTER_HANDLER,
-     HANDLER_GROUP)]
+    (CUST_FILTER_HANDLER, HANDLER_GROUP),
+]

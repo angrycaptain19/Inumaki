@@ -1,6 +1,13 @@
 from typing import Optional
 
-from telegram import Message, Update, User, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import (
+    Message,
+    Update,
+    User,
+    ParseMode,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters, CallbackContext
 from telegram.utils.helpers import escape_markdown
@@ -28,7 +35,8 @@ def send_rules(update, chat_id, from_pm=False):
             bot.send_message(
                 user.id,
                 "The rules shortcut for this chat hasn't been set properly! Ask admins to "
-                "fix this.")
+                "fix this.",
+            )
             return
         else:
             raise
@@ -38,23 +46,32 @@ def send_rules(update, chat_id, from_pm=False):
 
     if from_pm and rules:
         bot.send_message(
-            user.id,
-            text,
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True)
+            user.id, text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True
+        )
     elif from_pm:
         bot.send_message(
-            user.id, "The group admins haven't set any rules for this chat yet. "
-            "This probably doesn't mean it's lawless though...!")
+            user.id,
+            "The group admins haven't set any rules for this chat yet. "
+            "This probably doesn't mean it's lawless though...!",
+        )
     elif rules:
-        update.effective_message.reply_text("Contact me in PM to get this group's rules.",
-                                            reply_markup=InlineKeyboardMarkup(
-                                                [[InlineKeyboardButton(text="Rules",
-                                                                    url=f"t.me/{bot.username}?start={chat_id}")]]))
+        update.effective_message.reply_text(
+            "Contact me in PM to get this group's rules.",
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text="Rules", url=f"t.me/{bot.username}?start={chat_id}"
+                        )
+                    ]
+                ]
+            ),
+        )
     else:
         update.effective_message.reply_text(
             "The group admins haven't set any rules for this chat yet. "
-            "This probably doesn't mean it's lawless though...!")
+            "This probably doesn't mean it's lawless though...!"
+        )
 
 
 @run_async
@@ -69,12 +86,12 @@ def set_rules(_, update: Update):
         # set correct offset relative to command
         offset = len(txt) - len(raw_text)
         markdown_rules = markdown_parser(
-            txt, entities=msg.parse_entities(), offset=offset)
+            txt, entities=msg.parse_entities(), offset=offset
+        )
 
         chat_id = update.effective_chat.id
         sql.set_rules(chat_id, markdown_rules)
-        update.effective_message.reply_text(
-            "Successfully set rules for this group.")
+        update.effective_message.reply_text("Successfully set rules for this group.")
 
 
 @run_async
@@ -91,7 +108,7 @@ def __stats__():
 
 def __import_data__(chat_id, data):
     # set chat rules
-    rules = data.get('info', {}).get('rules', "")
+    rules = data.get("info", {}).get("rules", "")
     sql.set_rules(chat_id, rules)
 
 
@@ -117,10 +134,8 @@ clear the rules for this chat.
 __mod_name__ = "Rules"
 
 GET_RULES_HANDLER = CommandHandler("rules", get_rules, filters=Filters.group)
-SET_RULES_HANDLER = CommandHandler(
-    "setrules", set_rules, filters=Filters.group)
-RESET_RULES_HANDLER = CommandHandler(
-    "clearrules", clear_rules, filters=Filters.group)
+SET_RULES_HANDLER = CommandHandler("setrules", set_rules, filters=Filters.group)
+RESET_RULES_HANDLER = CommandHandler("clearrules", clear_rules, filters=Filters.group)
 
 dispatcher.add_handler(GET_RULES_HANDLER)
 dispatcher.add_handler(SET_RULES_HANDLER)

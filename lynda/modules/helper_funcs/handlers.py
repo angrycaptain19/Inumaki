@@ -4,23 +4,17 @@ from telegram import MessageEntity, Update
 from telegram.ext import CommandHandler, MessageHandler, RegexHandler, Filters
 from time import sleep
 
-CMD_STARTERS = ('/', '!') if ALLOW_EXCL else ('/', )
+CMD_STARTERS = ("/", "!") if ALLOW_EXCL else ("/",)
 
 
 class CustomCommandHandler(CommandHandler):
-
-    def __init__(self,
-                 command,
-                 callback,
-                 admin_ok=False,
-                 allow_edit=False,
-                 **kwargs):
+    def __init__(self, command, callback, admin_ok=False, allow_edit=False, **kwargs):
         super().__init__(command, callback, **kwargs)
 
         if allow_edit is False:
             self.filters &= ~(
-                Filters.update.edited_message
-                | Filters.update.edited_channel_post)
+                Filters.update.edited_message | Filters.update.edited_channel_post
+            )
 
     def check_update(self, update):
         if not isinstance(update, Update) or not update.effective_message:
@@ -38,7 +32,8 @@ class CustomCommandHandler(CommandHandler):
         if message.text and len(message.text) > 1:
             fst_word = message.text.split(None, 1)[0]
             if len(fst_word) > 1 and any(
-                        fst_word.startswith(start) for start in CMD_STARTERS):
+                fst_word.startswith(start) for start in CMD_STARTERS
+            ):
 
                 args = message.text.split()[1:]
                 command = fst_word[1:].split("@")
@@ -58,16 +53,13 @@ class CustomCommandHandler(CommandHandler):
 
     def handle_update(self, update, dispatcher, check_result, context=None):
         if context:
-            self.collect_additional_context(context, update, dispatcher,
-                                            check_result)
+            self.collect_additional_context(context, update, dispatcher, check_result)
             return self.callback(update, context)
         else:
-            optional_args = self.collect_optional_args(dispatcher, update,
-                                                       check_result)
+            optional_args = self.collect_optional_args(dispatcher, update, check_result)
             return self.callback(dispatcher.bot, update, **optional_args)
 
-    def collect_additional_context(self, context, update, dispatcher,
-                                   check_result):
+    def collect_additional_context(self, context, update, dispatcher, check_result):
         if isinstance(check_result, bool):
             context.args = update.effective_message.text.split()[1:]
         else:
@@ -77,24 +69,17 @@ class CustomCommandHandler(CommandHandler):
 
 
 class CustomRegexHandler(RegexHandler):
-
     def __init__(self, pattern, callback, friendly="", **kwargs):
         super().__init__(pattern, callback, **kwargs)
 
 
 class CustomMessageHandler(MessageHandler):
-
-    def __init__(self,
-                filters,
-                callback,
-                friendly="",
-                allow_edit=False,
-                **kwargs):
+    def __init__(self, filters, callback, friendly="", allow_edit=False, **kwargs):
         super().__init__(filters, callback, **kwargs)
         if allow_edit is False:
             self.filters &= ~(
-                Filters.update.edited_message
-                | Filters.update.edited_channel_post)
+                Filters.update.edited_message | Filters.update.edited_channel_post
+            )
 
         def check_update(self, update):
             if isinstance(update, Update) and update.effective_message:

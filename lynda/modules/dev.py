@@ -20,11 +20,11 @@ def leave(update: Update, context: CallbackContext):
         chat_id = str(args[0])
         try:
             context.bot.leave_chat(int(chat_id))
-            message.reply_text(
-                "Beep boop, I left that soup!.")
+            message.reply_text("Beep boop, I left that soup!.")
         except TelegramError:
             message.reply_text(
-                "Beep boop, I could not leave that group(dunno why tho).")
+                "Beep boop, I could not leave that group(dunno why tho)."
+            )
     else:
         message.reply_text("Send a valid chat ID")
 

@@ -13,7 +13,8 @@ from lynda.__main__ import (
     DATA_IMPORT,
     DATA_EXPORT,
     CHAT_SETTINGS,
-    USER_SETTINGS)
+    USER_SETTINGS,
+)
 from lynda.modules.helper_funcs.chat_status import sudo_plus, dev_plus
 
 
@@ -23,8 +24,8 @@ def load(update: Update, _):
     message = update.effective_message
     text = message.text.split(" ", 1)[1]
     load_messasge = message.reply_text(
-        f"Attempting to load module : <b>{text}</b>",
-        parse_mode=ParseMode.HTML)
+        f"Attempting to load module : <b>{text}</b>", parse_mode=ParseMode.HTML
+    )
 
     try:
         imported_module = importlib.import_module("lynda.modules." + text)
@@ -79,8 +80,8 @@ def load(update: Update, _):
         USER_SETTINGS[imported_module.__mod_name__.lower()] = imported_module
 
     load_messasge.edit_text(
-        "Successfully loaded module : <b>{}</b>".format(text),
-        parse_mode=ParseMode.HTML)
+        "Successfully loaded module : <b>{}</b>".format(text), parse_mode=ParseMode.HTML
+    )
 
 
 @run_async
@@ -89,8 +90,8 @@ def unload(update: Update, _):
     message = update.effective_message
     text = message.text.split(" ", 1)[1]
     unload_messasge = message.reply_text(
-        f"Attempting to unload module : <b>{text}</b>",
-        parse_mode=ParseMode.HTML)
+        f"Attempting to unload module : <b>{text}</b>", parse_mode=ParseMode.HTML
+    )
 
     try:
         imported_module = importlib.import_module("lynda.modules." + text)
@@ -146,8 +147,8 @@ def unload(update: Update, _):
         USER_SETTINGS.pop(imported_module.__mod_name__.lower())
 
     unload_messasge.edit_text(
-        f"Successfully unloaded module : <b>{text}</b>",
-        parse_mode=ParseMode.HTML)
+        f"Successfully unloaded module : <b>{text}</b>", parse_mode=ParseMode.HTML
+    )
 
 
 @run_async
@@ -161,8 +162,8 @@ def listmodules(update: Update, _):
         file_info = IMPORTED[helpable_module_info.__mod_name__.lower()]
         file_name = file_info.__name__.rsplit("lynda.modules.", 1)[1]
         mod_name = file_info.__mod_name__
-        module_list.append(f'- <code>{mod_name} ({file_name})</code>\n')
-    module_list = "Following modules are loaded : \n\n" + ''.join(module_list)
+        module_list.append(f"- <code>{mod_name} ({file_name})</code>\n")
+    module_list = "Following modules are loaded : \n\n" + "".join(module_list)
     message.reply_text(module_list, parse_mode=ParseMode.HTML)
 
 

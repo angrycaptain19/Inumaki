@@ -7,12 +7,20 @@ from telegram import Update, ParseMode, TelegramError
 from telegram.ext import CommandHandler, run_async, CallbackContext
 from telegram.utils.helpers import mention_html
 
-from lynda import dispatcher, WHITELIST_USERS, SARDEGNA_USERS, SUPPORT_USERS, SUDO_USERS, DEV_USERS, OWNER_ID
+from lynda import (
+    dispatcher,
+    WHITELIST_USERS,
+    SARDEGNA_USERS,
+    SUPPORT_USERS,
+    SUDO_USERS,
+    DEV_USERS,
+    OWNER_ID,
+)
 from lynda.modules.helper_funcs.chat_status import whitelist_plus, dev_plus, sudo_plus
 from lynda.modules.helper_funcs.extraction import extract_user
 from lynda.modules.log_channel import gloggable
 
-ELEVATED_USERS_FILE = os.path.join(os.getcwd(), 'lynda/elevated_users.json')
+ELEVATED_USERS_FILE = os.path.join(os.getcwd(), "lynda/elevated_users.json")
 
 
 def check_user_id(user_id: int, context: CallbackContext) -> Optional[str]:
@@ -45,9 +53,8 @@ Report abuse or ask us more on these at [Lynda Eagle Support](https://t.me/Lynda
 
 def send_nations(update):
     update.effective_message.reply_text(
-        nations,
-        parse_mode=ParseMode.MARKDOWN,
-        disable_web_page_preview=True)
+        nations, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True
+    )
 
 
 @run_async
@@ -68,7 +75,7 @@ def addsudo(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in SUDO_USERS:
@@ -77,31 +84,34 @@ def addsudo(update: Update, context: CallbackContext) -> str:
 
     if user_id in SUPPORT_USERS:
         rt += "Requested HA to promote a Sakura Nation to Royal."
-        data['supports'].remove(user_id)
+        data["supports"].remove(user_id)
         SUPPORT_USERS.remove(user_id)
 
     if user_id in WHITELIST_USERS:
         rt += "Requested HA to promote a Neptunia Nation to Royal."
-        data['whitelists'].remove(user_id)
+        data["whitelists"].remove(user_id)
         WHITELIST_USERS.remove(user_id)
 
-    data['sudos'].append(user_id)
+    data["sudos"].append(user_id)
     SUDO_USERS.append(user_id)
 
-    with open(ELEVATED_USERS_FILE, 'w') as outfile:
+    with open(ELEVATED_USERS_FILE, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
     update.effective_message.reply_text(
-        rt +
-        "\nSuccessfully set Nation level of {} to Royal!".format(
-            user_member.first_name))
+        rt
+        + "\nSuccessfully set Nation level of {} to Royal!".format(
+            user_member.first_name
+        )
+    )
 
     log_message = (
         f"#SUDO\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+    )
 
-    if chat.type != 'private':
+    if chat.type != "private":
         log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
     return log_message
@@ -126,12 +136,12 @@ def addsupport(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in SUDO_USERS:
         rt += "Requested HA to deomote this Royal to Sakura"
-        data['sudos'].remove(user_id)
+        data["sudos"].remove(user_id)
         SUDO_USERS.remove(user_id)
 
     if user_id in SUPPORT_USERS:
@@ -140,24 +150,26 @@ def addsupport(update: Update, context: CallbackContext) -> str:
 
     if user_id in WHITELIST_USERS:
         rt += "Requested HA to promote this Neptunia Nation to Sakura"
-        data['whitelists'].remove(user_id)
+        data["whitelists"].remove(user_id)
         WHITELIST_USERS.remove(user_id)
 
-    data['supports'].append(user_id)
+    data["supports"].append(user_id)
     SUPPORT_USERS.append(user_id)
 
-    with open(ELEVATED_USERS_FILE, 'w') as outfile:
+    with open(ELEVATED_USERS_FILE, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
     update.effective_message.reply_text(
-        rt + f"\n{user_member.first_name} was added as a Sakura Nation!")
+        rt + f"\n{user_member.first_name} was added as a Sakura Nation!"
+    )
 
     log_message = (
         f"#SUPPORT\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+    )
 
-    if chat.type != 'private':
+    if chat.type != "private":
         log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
     return log_message
@@ -182,38 +194,40 @@ def addwhitelist(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in SUDO_USERS:
         rt += "This member is a Royal Nation, Demoting to Neptunia."
-        data['sudos'].remove(user_id)
+        data["sudos"].remove(user_id)
         SUDO_USERS.remove(user_id)
 
     if user_id in SUPPORT_USERS:
         rt += "This user is already a Sakura Nation, Demoting to Neptunia."
-        data['supports'].remove(user_id)
+        data["supports"].remove(user_id)
         SUPPORT_USERS.remove(user_id)
 
     if user_id in WHITELIST_USERS:
         message.reply_text("This user is already a Neptunia Nation.")
         return ""
 
-    data['whitelists'].append(user_id)
+    data["whitelists"].append(user_id)
     WHITELIST_USERS.append(user_id)
 
-    with open(ELEVATED_USERS_FILE, 'w') as outfile:
+    with open(ELEVATED_USERS_FILE, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
     update.effective_message.reply_text(
-        rt + f"\nSuccessfully promoted {user_member.first_name} to a Neptunia Nation!")
+        rt + f"\nSuccessfully promoted {user_member.first_name} to a Neptunia Nation!"
+    )
 
     log_message = (
         f"#WHITELIST\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)} \n"
-        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+    )
 
-    if chat.type != 'private':
+    if chat.type != "private":
         log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
     return log_message
@@ -238,43 +252,45 @@ def addSardegna(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in SUDO_USERS:
         rt += "This member is a Royal Nation, Demoting to Sardegna."
-        data['sudos'].remove(user_id)
+        data["sudos"].remove(user_id)
         SUDO_USERS.remove(user_id)
 
     if user_id in SUPPORT_USERS:
         rt += "This user is already a Sakura Nation, Demoting to Sardegna."
-        data['supports'].remove(user_id)
+        data["supports"].remove(user_id)
         SUPPORT_USERS.remove(user_id)
 
     if user_id in WHITELIST_USERS:
         rt += "This user is already a Neptunia Nation, Demoting to Sardegna."
-        data['whitelists'].remove(user_id)
+        data["whitelists"].remove(user_id)
         WHITELIST_USERS.remove(user_id)
 
     if user_id in SARDEGNA_USERS:
         message.reply_text("This user is already a Sardegna.")
         return ""
 
-    data['Sardegnas'].append(user_id)
+    data["Sardegnas"].append(user_id)
     SARDEGNA_USERS.append(user_id)
 
-    with open(ELEVATED_USERS_FILE, 'w') as outfile:
+    with open(ELEVATED_USERS_FILE, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
     update.effective_message.reply_text(
-        rt + f"\nSuccessfully promoted {user_member.first_name} to a Sardegna Nation!")
+        rt + f"\nSuccessfully promoted {user_member.first_name} to a Sardegna Nation!"
+    )
 
     log_message = (
         f"#SARDEGNA\n"
         f"<b>Admin:</b> {mention_html(user.id, user.first_name)} \n"
-        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+        f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+    )
 
-    if chat.type != 'private':
+    if chat.type != "private":
         log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
     return log_message
@@ -293,23 +309,23 @@ def removesudo(update: Update, context: CallbackContext) -> str:
     if reply:
         message.reply_text(reply)
         return ""
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
     if user_id in SUDO_USERS:
         message.reply_text("Requested HA to demote this user to Civilian")
         SUDO_USERS.remove(user_id)
-        data['sudos'].remove(user_id)
-        with open(ELEVATED_USERS_FILE, 'w') as outfile:
+        data["sudos"].remove(user_id)
+        with open(ELEVATED_USERS_FILE, "w") as outfile:
             json.dump(data, outfile, indent=4)
         user = update.effective_user
         log_message = (
             f"#UNSUDO\n"
             f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+        )
         chat = update.effective_chat
-        if chat.type != 'private':
-            log_message = "<b>{}:</b>\n".format(
-                html.escape(chat.title)) + log_message
+        if chat.type != "private":
+            log_message = "<b>{}:</b>\n".format(html.escape(chat.title)) + log_message
 
         return log_message
 
@@ -333,26 +349,27 @@ def removesupport(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in SUPPORT_USERS:
         message.reply_text("Requested HA to demote this user to Civilian")
         SUPPORT_USERS.remove(user_id)
-        data['supports'].remove(user_id)
+        data["supports"].remove(user_id)
 
-        with open(ELEVATED_USERS_FILE, 'w') as outfile:
+        with open(ELEVATED_USERS_FILE, "w") as outfile:
             json.dump(data, outfile, indent=4)
 
         user = update.effective_user
         log_message = (
             f"#UNSUPPORT\n"
             f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+        )
 
         chat = update.effective_chat
 
-        if chat.type != 'private':
+        if chat.type != "private":
             log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
         return log_message
@@ -377,26 +394,27 @@ def removewhitelist(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in WHITELIST_USERS:
         message.reply_text("Demoting to normal user")
         WHITELIST_USERS.remove(user_id)
-        data['whitelists'].remove(user_id)
+        data["whitelists"].remove(user_id)
 
-        with open(ELEVATED_USERS_FILE, 'w') as outfile:
+        with open(ELEVATED_USERS_FILE, "w") as outfile:
             json.dump(data, outfile, indent=4)
 
         user = update.effective_user
         log_message = (
             f"#UNWHITELIST\n"
             f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+        )
 
         chat = update.effective_chat
 
-        if chat.type != 'private':
+        if chat.type != "private":
             log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
         return log_message
@@ -410,7 +428,7 @@ def removewhitelist(update: Update, context: CallbackContext) -> str:
 @gloggable
 def removeSardegna(update: Update, context: CallbackContext) -> str:
     args = context.args
-    bot= context.bot
+    bot = context.bot
     message = update.effective_message
     user_id = extract_user(message, args)
     user_member = bot.getChat(user_id)
@@ -420,26 +438,27 @@ def removeSardegna(update: Update, context: CallbackContext) -> str:
         message.reply_text(reply)
         return ""
 
-    with open(ELEVATED_USERS_FILE, 'r') as infile:
+    with open(ELEVATED_USERS_FILE, "r") as infile:
         data = json.load(infile)
 
     if user_id in SARDEGNA_USERS:
         message.reply_text("Demoting to normal user")
         SARDEGNA_USERS.remove(user_id)
-        data['Sardegnas'].remove(user_id)
+        data["Sardegnas"].remove(user_id)
 
-        with open(ELEVATED_USERS_FILE, 'w') as outfile:
+        with open(ELEVATED_USERS_FILE, "w") as outfile:
             json.dump(data, outfile, indent=4)
 
         user = update.effective_user
         log_message = (
             f"#UNSARDEGNA\n"
             f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}")
+            f"<b>User:</b> {mention_html(user_member.id, user_member.first_name)}"
+        )
 
         chat = update.effective_chat
 
-        if chat.type != 'private':
+        if chat.type != "private":
             log_message = f"<b>{html.escape(chat.title)}:</b>\n" + log_message
 
         return log_message
@@ -545,26 +564,24 @@ You can visit @YorktownEagleUnion or @LyndaEagleSupport to query more about thes
 
 SUDO_HANDLER = CommandHandler(("addsudo", "addRoyal"), addsudo, pass_args=True)
 SUPPORT_HANDLER = CommandHandler(
-    ("addsupport", "addSakura"), addsupport, pass_args=True)
+    ("addsupport", "addSakura"), addsupport, pass_args=True
+)
 SARDEGNA_HANDLER = CommandHandler(("addSardegna"), addSardegna, pass_args=True)
 WHITELIST_HANDLER = CommandHandler(
-    ("addwhitelist", "addNeptunia"), addwhitelist, pass_args=True)
+    ("addwhitelist", "addNeptunia"), addwhitelist, pass_args=True
+)
 UNSUDO_HANDLER = CommandHandler(
-    ("removesudo", "removeRoyal"), removesudo, pass_args=True)
+    ("removesudo", "removeRoyal"), removesudo, pass_args=True
+)
 UNSUPPORT_HANDLER = CommandHandler(
-    ("removesupport", "removeSakura"), removesupport, pass_args=True)
-UNSARDEGNA_HANDLER = CommandHandler(
-    ("removeSardegna"),
-    removeSardegna,
-    pass_args=True)
+    ("removesupport", "removeSakura"), removesupport, pass_args=True
+)
+UNSARDEGNA_HANDLER = CommandHandler(("removeSardegna"), removeSardegna, pass_args=True)
 UNWHITELIST_HANDLER = CommandHandler(
-    ("removewhitelist",
-    "removeNeptunia"),
-    removewhitelist,
-    pass_args=True)
+    ("removewhitelist", "removeNeptunia"), removewhitelist, pass_args=True
+)
 
-WHITELISTLIST_HANDLER = CommandHandler(
-    ["whitelistlist", "Neptunians"], whitelistlist)
+WHITELISTLIST_HANDLER = CommandHandler(["whitelistlist", "Neptunians"], whitelistlist)
 SARDEGNALIST_HANDLER = CommandHandler(["Sardegnas"], Sardegnalist)
 SUPPORTLIST_HANDLER = CommandHandler(["supportlist", "Sakuras"], supportlist)
 SUDOLIST_HANDLER = CommandHandler(["sudolist", "Royals"], sudolist)
@@ -599,4 +616,5 @@ __handlers__ = [
     SARDEGNALIST_HANDLER,
     SUPPORTLIST_HANDLER,
     SUDOLIST_HANDLER,
-    DEVLIST_HANDLER]
+    DEVLIST_HANDLER,
+]
