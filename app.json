@@ -2,7 +2,7 @@
    "addons": [
       {
          "options": {
-            "version": "9.5"
+            "version": "12"
          },
          "plan": "heroku-postgresql"
       }
@@ -111,8 +111,8 @@
       "weeb",
       "group",
       "manager",
-      "Kigyō"
+      "Inumaki"
    ],
    "name": "Kigyō bot",
-   "repository": "https://github.com/AnimeKaizoku/Kigyōbot"
+   "repository": "https://github.com/Anomaliii/Inumaki"
 }
