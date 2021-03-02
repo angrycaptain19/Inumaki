@@ -34,9 +34,8 @@ def blackliststicker(update: Update, context: CallbackContext):
     else:
         if chat.type == "private":
             return
-        else:
-            chat_id = update.effective_chat.id
-            chat_name = chat.title
+        chat_id = update.effective_chat.id
+        chat_name = chat.title
 
     sticker_list = "<b>List black stickers currently in {}:</b>\n".format(chat_name)
 

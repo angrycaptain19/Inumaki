@@ -290,18 +290,15 @@ def connected(context: CallbackContext, update, chat, user_id, need_admin=True):
             or (user.id in SUDO_USERS)
             or (user.id in DEV_USERS)
         ):
-            if need_admin is True:
-                if (
+            if need_admin is not True:
+                return conn_id
+            if (
                     getstatusadmin.status in ADMIN_STATUS
                     or user_id in SUDO_USERS
                     or user.id in DEV_USERS
                 ):
-                    return conn_id
-                else:
-                    send_message(msg, "You must be an admin in the connected group!")
-                    raise Exception("Not admin!")
-            else:
                 return conn_id
+            send_message(msg, "You must be an admin in the connected group!")
         else:
             send_message(
                 msg,
@@ -309,7 +306,7 @@ def connected(context: CallbackContext, update, chat, user_id, need_admin=True):
                 "I've disconnected you.",
             )
             disconnect_chat(context.bot, update)
-            raise Exception("Not admin!")
+        raise Exception("Not admin!")
     else:
         return False
 

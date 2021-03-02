@@ -29,12 +29,11 @@ def check_user(user_id: int, context: CallbackContext, chat: Chat) -> Optional[s
     try:
         member = chat.get_member(user_id)
     except BadRequest as excp:
-        if excp.message == "User not found":
-            reply = "I can't seem to find this user"
-            return reply
-        else:
+        if excp.message != "User not found":
             raise
 
+        reply = "I can't seem to find this user"
+        return reply
     if user_id == bot.id:
         reply = "I'm not gonna MUTE myself, How high are you?"
         return reply
